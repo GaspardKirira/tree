@@ -1,0 +1,5 @@
+{
+  "name": "tree",
+  "type": "header-only",
+  "include": "include"
+}
