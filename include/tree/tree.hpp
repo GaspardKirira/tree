@@ -45,6 +45,11 @@ namespace tree
     return leaves;
   }
 
+  inline std::size_t count_nodes(const std::vector<Node> &nodes)
+  {
+    return nodes.size();
+  }
+
 }
 
 #endif
