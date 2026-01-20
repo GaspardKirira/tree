@@ -33,6 +33,18 @@ namespace tree
       edges += node.children.size();
     return edges;
   }
+
+  inline std::size_t count_leaves(const std::vector<Node> &nodes)
+  {
+    std::size_t leaves = 0;
+    for (const auto &node : nodes)
+    {
+      if (node.children.empty())
+        ++leaves;
+    }
+    return leaves;
+  }
+
 }
 
 #endif
