@@ -45,9 +45,34 @@ namespace tree
     return leaves;
   }
 
-  inline std::size_t count_nodes(const std::vector<Node> &nodes)
+  template <typename Node>
+  std::size_t count_nodes(const Node *root)
   {
-    return nodes.size();
+    if (!root)
+      return 0;
+
+    std::size_t total = 1;
+
+    for (const auto *child : root->children)
+      total += count_nodes(child);
+
+    return total;
+  }
+
+  template <typename Node>
+  std::size_t max_depth(const Node *root)
+  {
+    if (!root)
+      return 0;
+
+    std::size_t depth = 0;
+
+    for (const auto *child : root->children)
+    {
+      depth = std::max(depth, max_depth(child));
+    }
+
+    return depth + 1;
   }
 
 }
