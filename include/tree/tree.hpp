@@ -1,6 +1,7 @@
 #ifndef TREE_HPP
 #define TREE_HPP
 
+#include <algorithm>
 #include <cstddef>
 #include <vector>
 
@@ -45,36 +46,47 @@ namespace tree
     return leaves;
   }
 
-  template <typename Node>
-  std::size_t count_nodes(const Node *root)
+  inline std::vector<const Node *> index_by_id(const std::vector<Node> &nodes)
+  {
+    std::size_t maxId = 0;
+    for (const auto &n : nodes)
+      maxId = std::max(maxId, n.id);
+
+    std::vector<const Node *> idx(maxId + 1, nullptr);
+    for (const auto &n : nodes)
+      idx[n.id] = &n;
+
+    return idx;
+  }
+
+  template <typename NodeT>
+  std::size_t count_nodes(const NodeT *root)
   {
     if (!root)
       return 0;
 
     std::size_t total = 1;
 
-    for (const auto *child : root->children)
+    for (const NodeT *child : root->children)
       total += count_nodes(child);
 
     return total;
   }
 
-  template <typename Node>
-  std::size_t max_depth(const Node *root)
+  template <typename NodeT>
+  std::size_t max_depth(const NodeT *root)
   {
     if (!root)
       return 0;
 
     std::size_t depth = 0;
 
-    for (const auto *child : root->children)
-    {
+    for (const NodeT *child : root->children)
       depth = std::max(depth, max_depth(child));
-    }
 
     return depth + 1;
   }
 
-}
+} // namespace tree
 
 #endif
