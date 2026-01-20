@@ -87,6 +87,17 @@ namespace tree
     return depth + 1;
   }
 
+  inline std::size_t count_internal_nodes(const std::vector<Node> &nodes)
+  {
+    std::size_t count = 0;
+    for (const auto &n : nodes)
+    {
+      if (!n.children.empty())
+        ++count;
+    }
+    return count;
+  }
+
 } // namespace tree
 
 #endif
