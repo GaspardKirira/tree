@@ -1,5 +1,8 @@
 {
   "name": "tree",
   "type": "header-only",
-  "include": "include"
+  "include": "include",
+  "cmake": {
+    "target": "gaspardkirira::tree"
+  }
 }
