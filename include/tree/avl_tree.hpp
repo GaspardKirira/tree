@@ -16,12 +16,12 @@
 namespace tree::detail {
 
 template <typename T, typename = void>
-struct is_tuple_like_ : std::false_type {};
+inline constexpr bool is_tuple_like_ = false;
 
 template <typename T>
-struct is_tuple_like_ <T, std::void_t <
-	decltype (std::tuple_size <T>::value)>
-> : std::true_type {};
+inline constexpr bool is_tuple_like_ <T, std::void_t <
+	decltype (std::tuple_size <T>::value)> // NOLINT(modernize-type-traits)
+> = true;
 
 template <typename T>
 struct avl_tree_node_data_  {
@@ -34,11 +34,13 @@ struct avl_tree_node_data_  {
 	T value;
 	std::size_t height_plus_one; // TODO: replace height with diff of subtree heights, which is always -1, 0 or 1
 
+	// cppcheck-suppress-begin noExplicitConstructor
 	explicit (false) avl_tree_node_data_ (const T & value, std::size_t height_plus_one = 0)
 		: value (value), height_plus_one (height_plus_one) {}
 
 	explicit (false) avl_tree_node_data_ (T && value, std::size_t height_plus_one = 0)
 		: value (std::move (value)), height_plus_one (height_plus_one) {}
+	// cppcheck-suppress-end noExplicitConstructor
 
 	friend std::ostream & operator<< (std::ostream & os, const avl_tree_node_data_ & data) {
 		os << data.value;
@@ -67,12 +69,14 @@ struct avl_tree_ {
 namespace std {
 
 template <typename T>
-requires tree::detail::is_tuple_like_ <T>::value
+requires tree::detail::is_tuple_like_ <T>
+// NOLINTNEXTLINE(bugprone-std-namespace-modification,cert-dcl58-cpp)
 struct tuple_size <tree::detail::avl_tree_node_data_ <T>>
 	: tuple_size <T> {};
 
 template <std::size_t I, typename T>
-requires tree::detail::is_tuple_like_ <T>::value
+requires tree::detail::is_tuple_like_ <T>
+// NOLINTNEXTLINE(bugprone-std-namespace-modification,cert-dcl58-cpp)
 struct tuple_element <I, tree::detail::avl_tree_node_data_ <T>>
 	: tuple_element <I, T> {};
 
@@ -141,7 +145,7 @@ public: // binary_search_tree interface
 			[path = stack <const typename std::decay_t <decltype (tree)>::node *> (), &os]
 			(auto * node, auto * parent) mutable -> void {
 				if (nullptr != parent) {
-					while (path.top () != parent) {
+					while (path.top () != parent) { // NOLINT(altera-id-dependent-backward-branch)
 						path.pop ();
 					}
 				}
@@ -149,7 +153,7 @@ public: // binary_search_tree interface
 
 				std::size_t depth = path.size () - 1;
 
-				for (std::size_t i = 0; i < depth; i++) {
+				for (std::size_t i = 0; i < depth; i++) { // NOLINT(altera-id-dependent-backward-branch)
 					os << "  ";
 				}
 
@@ -186,6 +190,7 @@ public:
 		node_link link = path.top (); // path is always non-empty
 
 		if (nullptr == * link) {
+			// NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
 			* link = new node (node_data (std::forward <U> (value), 1));
 			this->m_size++;
 			rebalance_after_insert (std::move (path));
@@ -230,7 +235,7 @@ public:
 							path.push (n);
 							n = & (* n)->right;
 						}
-						while (* left_rightmost_link != * n);
+						while (* left_rightmost_link != * n); // NOLINT(altera-id-dependent-backward-branch)
 					}
 
 					* link = left_rightmost;
@@ -252,7 +257,7 @@ public:
 							path.push (n);
 							n = & (* n)->left;
 						}
-						while (* right_leftmost_link != * n);
+						while (* right_leftmost_link != * n); // NOLINT(altera-id-dependent-backward-branch)
 					}
 
 					* link = right_leftmost;
@@ -261,13 +266,14 @@ public:
 
 			to_remove->left = nullptr;
 			to_remove->right = nullptr;
-			delete to_remove;
+			delete to_remove; // NOLINT(cppcoreguidelines-owning-memory)
 			this->m_size--;
 			rebalance_after_remove (std::move (path));
 		}
 	}
 
 private:
+	// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
 	void rebalance_after_insert (stack <node_link> && path) {
 		node_link child = path.top ();
 		path.pop ();
@@ -362,6 +368,7 @@ private:
 		}
 	}
 
+	// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
 	void rebalance_after_remove (stack <node_link> && path) {
 		while (false == path.empty ()) {
 			node_link link = path.top ();

@@ -51,7 +51,9 @@ struct binary_search_tree_ {
 		{ c (t2, t) } -> std::convertible_to <bool>;
 	};
 
+	// cppcheck-suppress unusedStructMember
 	static constexpr bool KeepInvariant = KeepInvariant_;
+	// cppcheck-suppress unusedStructMember
 	static constexpr bool RemovePreserveLeft = RemovePreserveLeft_;
 
 	template <typename U>
@@ -173,7 +175,7 @@ public:
 		// requires (std::is_copy_constructible_v <T>)
 	{
 		if (nullptr != other.m_root) {
-			m_root = new node (* other.m_root);
+			m_root = new node (* other.m_root); // NOLINT(cppcoreguidelines-owning-memory)
 			m_size = other.m_size;
 		}
 		else {
@@ -187,7 +189,7 @@ public:
 			delete m_root;
 
 			if (nullptr != other.m_root) {
-				m_root = new node (* other.m_root);
+				m_root = new node (* other.m_root); // NOLINT(cppcoreguidelines-owning-memory)
 				m_size = other.m_size;
 			}
 			else {
@@ -325,11 +327,11 @@ public:
 		}
 	}
 
-	const node * root () const { return m_root; }
-	std::size_t size () const { return m_size; }
-	bool empty () const { return 0 == m_size; }
+	[[nodiscard]] const node * root () const { return m_root; }
+	[[nodiscard]] std::size_t size () const { return m_size; }
+	[[nodiscard]] bool empty () const { return 0 == m_size; }
 
-	std::size_t internal_path_length () const {
+	[[nodiscard]] std::size_t internal_path_length () const {
 		std::size_t s = 0;
 
 		if (nullptr != m_root) {
@@ -345,7 +347,7 @@ protected:
 	template <typename U>
 	requires std::convertible_to <U, T>
 	void insert_at (node_link link, U && value) {
-		* link = new node (std::forward <U> (value));
+		* link = new node (std::forward <U> (value)); // NOLINT(cppcoreguidelines-owning-memory)
 		m_size++;
 	}
 
@@ -406,7 +408,7 @@ protected:
 
 		to_remove->left = nullptr;
 		to_remove->right = nullptr;
-		delete to_remove;
+		delete to_remove; // NOLINT(cppcoreguidelines-owning-memory)
 		m_size--;
 	}
 
@@ -428,7 +430,7 @@ protected:
 	const_node_link get_link (const VC & value) const {
 		const_node_link link = & m_root;
 
-		while (nullptr != * link) {
+		while (nullptr != * link) { // NOLINT(altera-id-dependent-backward-branch)
 			bool lt = less_than (value, (* link)->data);
 			bool gt = less_than ((* link)->data, value);
 
@@ -452,7 +454,7 @@ protected:
 		stack <U> link_stack;
 		link_stack.push (link);
 
-		while (nullptr != * link) {
+		while (nullptr != * link) { // NOLINT(altera-id-dependent-backward-branch)
 			bool lt = less_than (value, (* link)->data);
 			bool gt = less_than ((* link)->data, value);
 

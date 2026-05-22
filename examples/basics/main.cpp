@@ -8,7 +8,7 @@
 # include <string>
 # include <vector>
 
-# include "tree/config.hpp"
+# include <tree/config.hpp>
 
 static void binary_search_tree_example ();
 static void avl_tree_example ();

@@ -8,6 +8,7 @@
 # include <initializer_list>
 # include <iterator>
 # include <ostream>
+# include <stdexcept>
 # include <tuple>
 # include <type_traits>
 # include <utility>
@@ -16,7 +17,7 @@
 
 # include <tree/splay_tree.hpp>
 
-namespace tree {
+namespace tree { // NOLINT(modernize-concat-nested-namespaces)
 
 namespace detail {
 template <
@@ -70,7 +71,7 @@ struct map_node_data_ {
 	template <std::size_t I>
 	requires (2 > I)
 	friend constexpr std::tuple_element_t <I, map_node_data_> &&
-	get (map_node_data_ && nd) noexcept
+	get (map_node_data_ && nd) noexcept // NOLINT(cppcoreguidelines-rvalue-reference-param-not-moved)
 	{
 		if constexpr (0 == I) {
 			return std::move (nd.key);
@@ -124,15 +125,18 @@ struct map_detail_ {
 namespace std {
 
 template <typename Kt, typename Vt>
+// NOLINTNEXTLINE(bugprone-std-namespace-modification,cert-dcl58-cpp)
 struct tuple_size <tree::detail::map_node_data_ <Kt, Vt>>
 	: std::integral_constant <std::size_t, 2> {};
 
 template <typename Kt, typename Vt>
+// NOLINTNEXTLINE(bugprone-std-namespace-modification,cert-dcl58-cpp)
 struct tuple_element <0, tree::detail::map_node_data_ <Kt, Vt>> {
 	using type = Kt;
 };
 
 template <typename Kt, typename Vt>
+// NOLINTNEXTLINE(bugprone-std-namespace-modification,cert-dcl58-cpp)
 struct tuple_element <1, tree::detail::map_node_data_ <Kt, Vt>> {
 	using type = Vt;
 };
@@ -245,6 +249,40 @@ public:
 			// so insert should return one.
 
 		return inserting;
+	}
+
+	template <typename Kt_, typename Vt_>
+	requires std::convertible_to <Kt_, Kt> && std::convertible_to <Vt_, Vt>
+	bool insert (const std::pair <Kt_, Vt_> & value) {
+		return insert (value.first, value.second);
+	}
+
+	template <typename Kt_, typename Vt_>
+	requires std::convertible_to <Kt_, Kt> && std::convertible_to <Vt_, Vt>
+	bool insert (std::pair <Kt_, Vt_> && value) { // NOLINT(cppcoreguidelines-rvalue-reference-param-not-moved)
+		return insert (std::move (value.first), std::move (value.second));
+	}
+
+	Vt & at (const Kt & key) {
+		if (false == this->contains (key)) {
+			this->insert (key, Vt {});
+		}
+		return static_cast <node_data &> ((* tree::get_link (key))->data).value;
+	}
+
+	const Vt & at (const Kt & key) const {
+		if (false == this->contains (key)) {
+			throw std::out_of_range ("map::at");
+		}
+		return static_cast <const node_data &> ((* tree::get_link (key))->data).value;
+	}
+
+	Vt & operator[] (const Kt & key) {
+		return at (key);
+	}
+
+	const Vt & operator[] (const Kt & key) const {
+		return at (key);
 	}
 };
 

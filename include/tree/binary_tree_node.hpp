@@ -47,6 +47,7 @@ public:
 		using difference_type = std::ptrdiff_t;
 		using value_type = T;
 		using iterator_category = std::bidirectional_iterator_tag;
+		// cppcheck-suppress unusedStructMember
 		static constexpr iterator_algorithm algorithm = Alg;
 
 	protected:
@@ -58,7 +59,7 @@ public:
 
 		static iterator_base begin (NPT root) {
 			stack <NPT> path;
-			for (NPT n = root; nullptr != n; n = n->left) {
+			for (NPT n = root; nullptr != n; n = n->left) { // NOLINT(altera-id-dependent-backward-branch)
 				path.push (n);
 			}
 
@@ -91,7 +92,7 @@ public:
 
 		template <
 			typename NPT2,
-			typename = std::enable_if_t <
+			typename = std::enable_if_t < // NOLINT(modernize-use-constraints)
 				false == std::is_same_v <NPT2, NPT> && ( // disable copy constructor hijacking
 					true == std::is_same_v <NPT2, const_nptr> ||
 					true == std::is_same_v <NPT2, nptr>
@@ -116,7 +117,7 @@ public:
 
 		template <
 			typename It2,
-			typename = std::enable_if_t <
+			typename = std::enable_if_t < // NOLINT(modernize-use-constraints)
 				true == std::is_same_v <It2, iterator_base <nptr>> ||
 				true == std::is_same_v <It2, iterator_base <const_nptr>>
 			>
@@ -131,7 +132,7 @@ public:
 					m_path.push (m_node);
 					m_node = m_node->right;
 
-					while (nullptr != m_node->left) {
+					while (nullptr != m_node->left) { // NOLINT(altera-id-dependent-backward-branch)
 						m_path.push (m_node);
 						m_node = m_node->left;
 					}
@@ -140,7 +141,7 @@ public:
 					bool found = false;
 					const std::size_t itC = m_path.size ();
 
-					for (std::size_t i = 0; i < itC; i++) {
+					for (std::size_t i = 0; i < itC; i++) { // NOLINT(altera-id-dependent-backward-branch)
 						const NPT l = m_node;
 						m_node = m_path.top ();
 						m_path.pop ();
@@ -177,7 +178,7 @@ public:
 						m_path.push (m_node);
 						m_node = m_node->left;
 
-						while (nullptr != m_node->right) {
+						while (nullptr != m_node->right) { // NOLINT(altera-id-dependent-backward-branch)
 							m_path.push (m_node);
 							m_node = m_node->right;
 						}
@@ -186,7 +187,7 @@ public:
 						bool found = false;
 						std::size_t itC = m_path.size ();
 
-						for (std::size_t i = 0; i < itC; i++) {
+						for (std::size_t i = 0; i < itC; i++) { // NOLINT(altera-id-dependent-backward-branch)
 							const NPT l = m_node;
 							m_node = m_path.top ();
 							m_path.pop ();
@@ -205,7 +206,7 @@ public:
 				}
 				else { // decrementing end
 					m_path.clear ();
-					for (NPT n = m_root; nullptr != n; n = n->right) {
+					for (NPT n = m_root; nullptr != n; n = n->right) { // NOLINT(altera-id-dependent-backward-branch)
 						m_path.push (n);
 					}
 
@@ -241,7 +242,7 @@ public:
 		}
 
 	private:
-		const NPT m_root;
+		const NPT m_root; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 		NPT m_node;
 		stack <NPT> m_path;
 	};
@@ -292,13 +293,13 @@ public:
 			their.pop ();
 
 			if (t->left != nullptr) {
-				o->left = new binary_tree_node (t->left->data);
+				o->left = new binary_tree_node (t->left->data); // NOLINT(cppcoreguidelines-owning-memory)
 				our.push (o->left);
 				their.push (t->left);
 			}
 
 			if (nullptr != t->right) {
-				o->right = new binary_tree_node (t->right->data);
+				o->right = new binary_tree_node (t->right->data); // NOLINT(cppcoreguidelines-owning-memory)
 				our.push (o->right);
 				their.push (t->right);
 			}
@@ -359,7 +360,7 @@ public:
 				n->right = nullptr;
 			}
 
-			delete n;
+			delete n; // NOLINT(cppcoreguidelines-owning-memory)
 		}
 	}
 
@@ -429,7 +430,7 @@ public:
 
 				std::size_t depth = path.size () - 1;
 
-				for (std::size_t i = 0; i < depth; i++) {
+				for (std::size_t i = 0; i < depth; i++) { // NOLINT(altera-id-dependent-backward-branch)
 					os << "  ";
 				}
 
@@ -523,7 +524,7 @@ public:
 	requires is_node_link_v <U>
 	static U get_link_to_leftmost (U link) {
 		if (nullptr != * link) {
-			while (nullptr != (* link)->left) {
+			while (nullptr != (* link)->left) { // NOLINT(altera-id-dependent-backward-branch)
 				link = & (* link)->left;
 			}
 		}
@@ -535,7 +536,7 @@ public:
 	requires is_node_link_v <U>
 	static U get_link_to_rightmost (U link) {
 		if (nullptr != * link) {
-			while (nullptr != (* link)->right) {
+			while (nullptr != (* link)->right) { // NOLINT(altera-id-dependent-backward-branch)
 				link = & (* link)->right;
 			}
 		}
@@ -550,7 +551,7 @@ public:
 		link_stack.push (link);
 
 		if (nullptr != * link) {
-			while (nullptr != (* link)->left) {
+			while (nullptr != (* link)->left) { // NOLINT(altera-id-dependent-backward-branch)
 				link = & (* link)->left;
 				link_stack.push (link);
 			}
@@ -566,7 +567,7 @@ public:
 		link_stack.push (link);
 
 		if (nullptr != * link) {
-			while (nullptr != (* link)->right) {
+			while (nullptr != (* link)->right) { // NOLINT(altera-id-dependent-backward-branch)
 				link = & (* link)->right;
 				link_stack.push (link);
 			}
@@ -580,6 +581,8 @@ private:
 	requires
 		   std::same_as <std::remove_cv_t <std::remove_pointer_t <U>>, binary_tree_node>
 		&& std::invocable <F &, U, U>
+		// NOTE: const F & doesn't accept mutable lambdas
+		// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 	static void preorder_traverse (U node, F && func) {
 		stack <U> nodes;
 		stack <U> parents;
@@ -609,6 +612,8 @@ private:
 	requires
 		   std::same_as <std::remove_cv_t <std::remove_pointer_t <U>>, binary_tree_node>
 		&& std::invocable <F &, U, U>
+		// NOTE: const F & doesn't accept mutable lambdas
+		// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 	static void inorder_traverse (U node, F && func, U parent = nullptr) {
 		if (nullptr != node->left) {
 			inorder_traverse (static_cast <U> (node->left), func, node);
@@ -625,6 +630,8 @@ private:
 	requires
 		   std::same_as <std::remove_cv_t <std::remove_pointer_t <U>>, binary_tree_node>
 		&& std::invocable <F &, U, U>
+		// NOTE: const F & doesn't accept mutable lambdas
+		// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 	static void postorder_traverse (U node, F && func, U parent = nullptr) {
 		if (nullptr != node->left) {
 			postorder_traverse (static_cast <U> (node->left), func, node);
@@ -641,6 +648,8 @@ private:
 	requires
 		   std::same_as <std::remove_cv_t <std::remove_pointer_t <U>>, binary_tree_node>
 		&& std::invocable <F &, U, U>
+		// NOTE: const F & doesn't accept mutable lambdas
+		// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 	static void level_order_traverse (U node, F && func, U parent = nullptr) {
 		queue <U> nodes;
 		nodes.push (node);
@@ -671,6 +680,8 @@ private:
 	requires
 		   std::same_as <std::remove_cv_t <std::remove_pointer_t <U>>, binary_tree_node>
 		&& std::invocable <F &, U, U, std::size_t>
+		// NOTE: const F & doesn't accept mutable lambdas
+		// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 	static void level_order_traverse (U node, F && func, U parent = nullptr) {
 		queue <U> nodes, nodes_next;
 		nodes.push (node);
@@ -680,7 +691,7 @@ private:
 		std::size_t level = 0;
 
 		while (true) {
-			while (false == nodes.empty ()) {
+			while (false == nodes.empty ()) { // NOLINT(altera-id-dependent-backward-branch)
 				U n = nodes.front ();
 				nodes.pop ();
 				U p = parents.front ();
